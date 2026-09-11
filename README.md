@@ -17,10 +17,16 @@
   них; каждый верный ответ снижает вес, и выученный регион уходит из списка.
   Прогресс хранится в localStorage.
 
+Играть: **https://eugene-chernyshenko.github.io/studyge/**
+
 ```bash
 npm install
 npm run dev      # http://localhost:5173
 ```
+
+Пуш в `main` пересобирает и публикует сайт через GitHub Actions
+(`.github/workflows/pages.yml`). Карты в `public/data` закоммичены, так что
+сборка в CI не ходит в сеть; флаги копируются из `node_modules` скриптом.
 
 ## Наборы карт
 
