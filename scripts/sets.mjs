@@ -90,6 +90,18 @@ export const SETS = [
     attribution: 'Natural Earth (public domain)',
   },
   {
+    id: 'austria-states',
+    title: 'Земли Австрии',
+    group: 'Административные единицы',
+    country: 'Австрия',
+    unit: ['земля', 'земли', 'земель'],
+    source: { kind: 'ne-admin1', adm0: 'AUT' },
+    projection: 'mercator',
+    simplify: '30%',
+    modes: ['learn', 'locate'],
+    attribution: 'Natural Earth (public domain)',
+  },
+  {
     id: 'australia-states',
     title: 'Штаты и территории Австралии',
     group: 'Административные единицы',

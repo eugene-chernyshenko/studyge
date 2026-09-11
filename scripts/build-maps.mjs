@@ -123,13 +123,23 @@ const townPoints = places.features
     at: f.geometry.coordinates,
   }))
 
+// Wikidata has no Russian label for some small towns, and falling back to the
+// Latin one put "Форарльберг · Bregenz" next to "Штирия · Грац". Named here when
+// the town is worth showing; otherwise the seat is dropped rather than mixed in.
+const SEAT_OVERRIDES = { 'AT-8': 'Брегенц' }
+const hasCyrillic = (text) => /[А-Яа-яЁё]/.test(text)
+
 /** Attach a seat to each feature: by ISO code first, then by which town falls inside. */
 function withSeats(features) {
   return features.map((f) => {
     const fromIso = seatByIso.get(f.properties.id)
-    const seat = fromIso ?? townPoints.find((t) => contains(f.geometry, t.at)) ?? null
-    if (!seat?.name) return f
-    return { ...f, properties: { ...f.properties, seat: seat.name, seatAt: seat.at.map((n) => Math.round(n * 1000) / 1000) } }
+    const found = fromIso ?? townPoints.find((t) => contains(f.geometry, t.at)) ?? null
+    const name = SEAT_OVERRIDES[f.properties.id] ?? found?.name
+    if (!found || !name || !hasCyrillic(name)) return f
+    return {
+      ...f,
+      properties: { ...f.properties, seat: name, seatAt: found.at.map((n) => Math.round(n * 1000) / 1000) },
+    }
   })
 }
 

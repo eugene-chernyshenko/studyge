@@ -135,6 +135,31 @@
     "attribution": "Natural Earth (public domain)"
   },
   {
+    "id": "austria-states",
+    "title": "Земли Австрии",
+    "group": "Административные единицы",
+    "country": "Австрия",
+    "unit": [
+      "земля",
+      "земли",
+      "земель"
+    ],
+    "count": 9,
+    "modes": [
+      "learn",
+      "locate"
+    ],
+    "projection": "mercator",
+    "bbox": [
+      9.52,
+      46.38,
+      17.15,
+      49.01
+    ],
+    "file": "data/austria-states.json",
+    "attribution": "Natural Earth (public domain)"
+  },
+  {
     "id": "australia-states",
     "title": "Штаты и территории Австралии",
     "group": "Административные единицы",

@@ -41,6 +41,7 @@ const WIKIDATA_COUNTRIES = [
   'Q30', // США
   'Q414', // Аргентина
   'Q408', // Австралия
+  'Q40', // Австрия
 ]
 const SPARQL = `SELECT ?c ?cEn ?item ?ru ?en ?native ?iso ?coord ?end WHERE {
   VALUES ?c { ${WIKIDATA_COUNTRIES.map((q) => `wd:${q}`).join(' ')} }
