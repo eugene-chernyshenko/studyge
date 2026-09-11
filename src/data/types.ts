@@ -11,7 +11,11 @@ export interface MapSetMeta {
   unitPlural: string
   count: number
   modes: GameMode[]
-  projection: 'equalEarth' | 'mercator'
+  projection: 'equalEarth' | 'mercator' | 'conic'
+  /** Only for 'conic': rotation and standard parallels, for countries too wide
+   *  or too far east for an unrotated projection (Russia crosses 180°). */
+  rotate?: [number, number]
+  parallels?: [number, number]
   bbox: [number, number, number, number]
   file: string
   attribution: string

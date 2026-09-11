@@ -23,6 +23,35 @@
     "attribution": "Natural Earth (public domain)"
   },
   {
+    "id": "russia-subjects",
+    "title": "Субъекты России",
+    "group": "Административные единицы",
+    "country": "Россия",
+    "unitPlural": "субъектов",
+    "count": 89,
+    "modes": [
+      "learn",
+      "locate"
+    ],
+    "projection": "conic",
+    "rotate": [
+      -100,
+      0
+    ],
+    "parallels": [
+      50,
+      70
+    ],
+    "bbox": [
+      19.62,
+      41.19,
+      -169.7,
+      81.86
+    ],
+    "file": "data/russia-subjects.json",
+    "attribution": "Natural Earth (public domain)"
+  },
+  {
     "id": "slovenia-municipalities",
     "title": "Общины Словении",
     "group": "Административные единицы",

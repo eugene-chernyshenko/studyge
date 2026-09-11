@@ -25,7 +25,7 @@ const [admin1, admin0, places, wikidata, areasRaw, seatsRaw, overrides] = await 
   readJson(resolve(CACHE, 'ne_10m_admin_0.geojson')),
   readJson(resolve(CACHE, 'ne_10m_places.geojson')),
   readJson(resolve(CACHE, 'wikidata_admin_ru.json')),
-  readJson(resolve(CACHE, 'wikidata_areas.json')),
+  readJson(resolve(CACHE, 'wikidata_areas_subdivisions.json')),
   readJson(resolve(CACHE, 'wikidata_seats.json')),
   existsSync(OVERRIDES) ? readJson(OVERRIDES) : {},
 ])
@@ -171,9 +171,14 @@ function fromAdmin0() {
     })
 }
 
-function fromAdmin1(adm0) {
+function fromAdmin1(adm0, { include = [], exclude = [] } = {}) {
+  const isoOf = (p) => (p.iso_3166_2 && p.iso_3166_2 !== '-99' ? p.iso_3166_2 : null)
   return admin1.features
-    .filter((f) => f.properties.adm0_a3 === adm0)
+    .filter((f) => {
+      const iso = isoOf(f.properties)
+      if (iso && exclude.includes(iso)) return false
+      return f.properties.adm0_a3 === adm0 || (iso && include.includes(iso))
+    })
     .map((f) => {
       const p = f.properties
       // Prefer the ISO 3166-2 code as the id: it is stable and lets external
@@ -184,7 +189,9 @@ function fromAdmin1(adm0) {
         geometry: f.geometry,
         properties: {
           id: iso ?? p.adm1_code,
-          name: p.name_ru || overrides[iso] || overrides[nameKey(p.name)] || p.name,
+          // Overrides come first: Natural Earth's name_ru is wrong in places
+          // (it labels Altai Krai "Республика Алтай", the neighbouring republic).
+          name: overrides[iso] || overrides[nameKey(p.name)] || p.name_ru || p.name,
           nameEn: p.name,
         },
       }
@@ -343,7 +350,7 @@ for (const set of SETS) {
     set.source.kind === 'ne-admin0'
       ? fromAdmin0()
       : set.source.kind === 'ne-admin1'
-        ? fromAdmin1(set.source.adm0)
+        ? fromAdmin1(set.source.adm0, set.source)
         : await fromGeoBoundaries(set.source.file, set.source.isoPrefix)
 
   if (!features.length) throw new Error(`${set.id}: no features matched`)
@@ -393,6 +400,8 @@ for (const set of SETS) {
     count: collection.features.length,
     modes: set.modes,
     projection: set.projection,
+    ...(set.rotate ? { rotate: set.rotate } : {}),
+    ...(set.parallels ? { parallels: set.parallels } : {}),
     bbox: [w, s, e, n].map((x) => Math.round(x * 100) / 100),
     file: `data/${file}`,
     attribution: set.attribution,

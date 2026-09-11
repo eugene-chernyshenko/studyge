@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { geoEqualEarth, geoMercator, geoPath } from 'd3-geo'
+import { geoConicEqualArea, geoEqualEarth, geoMercator, geoPath } from 'd3-geo'
 import type { MapSet, Region } from '../data/types'
 import { useZoomPan } from './useZoomPan'
 
@@ -24,6 +24,15 @@ interface Props {
   answered: Map<string, string>
   onSelect: (regionId: string) => void
   interactive: boolean
+}
+
+function buildProjection(meta: MapSet['meta']) {
+  if (meta.projection === 'equalEarth') return geoEqualEarth()
+  if (meta.projection !== 'conic') return geoMercator()
+  const projection = geoConicEqualArea()
+  if (meta.rotate) projection.rotate(meta.rotate)
+  if (meta.parallels) projection.parallels(meta.parallels)
+  return projection
 }
 
 function useSize(ref: React.RefObject<Element | null>) {
@@ -61,7 +70,7 @@ export function MapBoard({ set, selectedId, reveal, answered, onSelect, interact
       type: 'FeatureCollection',
       features: set.regions.map((r) => ({ type: 'Feature', properties: null, geometry: r.geometry })),
     }
-    const projection = set.meta.projection === 'equalEarth' ? geoEqualEarth() : geoMercator()
+    const projection = buildProjection(set.meta)
     // Leave room for the floating HUD so no region sits permanently under it.
     projection.fitExtent(
       [

@@ -17,6 +17,31 @@ export const SETS = [
     attribution: 'Natural Earth (public domain)',
   },
   {
+    id: 'russia-subjects',
+    title: 'Субъекты России',
+    group: 'Административные единицы',
+    country: 'Россия',
+    unitPlural: 'субъектов',
+    source: {
+      kind: 'ne-admin1',
+      adm0: 'RUS',
+      // Natural Earth files these four under Ukraine; the set is built to the
+      // composition of 89 subjects, so they are pulled in by ISO code.
+      include: ['UA-14', 'UA-09', 'UA-23', 'UA-65'],
+      // An unnamed placeholder polygon of 0.008 deg² that NE ships for Russia.
+      exclude: ['RU-X01~'],
+    },
+    // Russia crosses the antimeridian, so an unrotated projection would smear it
+    // across the whole width. Conic equal-area centred on 100°E keeps it readable.
+    projection: 'conic',
+    rotate: [-100, 0],
+    parallels: [50, 70],
+    // 5% put Vladivostok 7 km outside its own coastline; 10% brings it back in.
+    simplify: '10%',
+    modes: ['learn', 'locate'],
+    attribution: 'Natural Earth (public domain)',
+  },
+  {
     id: 'slovenia-municipalities',
     title: 'Общины Словении',
     group: 'Административные единицы',

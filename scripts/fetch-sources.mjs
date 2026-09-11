@@ -23,7 +23,18 @@ const GEOBOUNDARIES = [
 ]
 
 // Russian labels: P150 = "contains administrative territorial entity".
-const WIKIDATA_COUNTRIES = ['Q215', 'Q574', 'Q836', 'Q1032', 'Q912', 'Q657', 'Q929', 'Q958']
+const WIKIDATA_COUNTRIES = [
+  'Q215', // Словения
+  'Q574', // Восточный Тимор
+  'Q836', // Мьянма
+  'Q1032', // Нигер
+  'Q912', // Мали
+  'Q657', // Чад
+  'Q929', // ЦАР
+  'Q958', // Южный Судан
+  'Q159', // Россия
+  'Q212', // Украина — четыре области входят в набор субъектов
+]
 const SPARQL = `SELECT ?c ?cEn ?item ?ru ?en ?native ?iso ?coord ?end WHERE {
   VALUES ?c { ${WIKIDATA_COUNTRIES.map((q) => `wd:${q}`).join(' ')} }
   ?c wdt:P150 ?item .
@@ -37,16 +48,22 @@ const SPARQL = `SELECT ?c ?cEn ?item ?ru ?en ?native ?iso ?coord ?end WHERE {
 }`
 
 // Published areas, used only by scripts/verify-geometry.mjs to check the built
-// maps against a source that had no part in building them.
-const AREA_SPARQL = `SELECT ?item ?ru ?iso3 ?iso2 ?area ?unit ?rank WHERE {
-  { ?item wdt:P298 ?iso3 . ?item wdt:P31 wd:Q3624078 }
-  UNION
-  { VALUES ?c { ${WIKIDATA_COUNTRIES.map((q) => `wd:${q}`).join(' ')} }
-    ?c wdt:P150 ?item . OPTIONAL { ?item wdt:P300 ?iso2 } }
+// maps against a source that had no part in building them. Split in two: asking
+// for countries and subdivisions at once times the public endpoint out.
+const COUNTRY_AREA_SPARQL = `SELECT ?item ?iso3 ?area ?unit ?rank WHERE {
+  ?item wdt:P298 ?iso3 ; wdt:P31 wd:Q3624078 .
   ?item p:P2046 ?st .
   ?st psv:P2046 ?v ; wikibase:rank ?rank .
   ?v wikibase:quantityAmount ?area ; wikibase:quantityUnit ?unit .
-  OPTIONAL { ?item rdfs:label ?ru FILTER(lang(?ru)="ru") }
+}`
+
+const SUBDIVISION_AREA_SPARQL = `SELECT ?item ?iso2 ?area ?unit ?rank WHERE {
+  VALUES ?c { ${WIKIDATA_COUNTRIES.map((q) => `wd:${q}`).join(' ')} }
+  ?c wdt:P150 ?item .
+  ?item wdt:P300 ?iso2 .
+  ?item p:P2046 ?st .
+  ?st psv:P2046 ?v ; wikibase:rank ?rank .
+  ?v wikibase:quantityAmount ?area ; wikibase:quantityUnit ?unit .
 }`
 
 // Administrative seats: which town is the centre of each unit, and where it is.
@@ -102,11 +119,25 @@ async function wikidata(file, query) {
     return
   }
   console.log(`  fetch   ${file}`)
-  const res = await fetch(`https://query.wikidata.org/sparql?query=${encodeURIComponent(query)}`, {
-    headers: { Accept: 'application/sparql-results+json', 'User-Agent': UA },
-  })
-  if (!res.ok) throw new Error(`wikidata ${file} -> HTTP ${res.status}`)
-  await writeFile(path, await res.text())
+  // The public endpoint returns 502/504 under load often enough that a single
+  // attempt makes `npm run data` flaky; back off and try again.
+  let lastStatus = 0
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    const res = await fetch(`https://query.wikidata.org/sparql?query=${encodeURIComponent(query)}`, {
+      headers: { Accept: 'application/sparql-results+json', 'User-Agent': UA },
+    })
+    if (res.ok) {
+      await writeFile(path, await res.text())
+      return
+    }
+    lastStatus = res.status
+    if (attempt < 4) {
+      const wait = attempt * 15_000
+      console.log(`          HTTP ${res.status}, повтор через ${wait / 1000} с`)
+      await new Promise((done) => setTimeout(done, wait))
+    }
+  }
+  throw new Error(`wikidata ${file} -> HTTP ${lastStatus} после 4 попыток`)
 }
 
 await mkdir(CACHE, { recursive: true })
@@ -114,6 +145,7 @@ console.log('sources:')
 for (const d of DOWNLOADS) await download(d.url, d.file)
 for (const g of GEOBOUNDARIES) await geoBoundaries(g)
 await wikidata('wikidata_admin_ru.json', SPARQL)
-await wikidata('wikidata_areas.json', AREA_SPARQL)
+await wikidata('wikidata_areas_countries.json', COUNTRY_AREA_SPARQL)
+await wikidata('wikidata_areas_subdivisions.json', SUBDIVISION_AREA_SPARQL)
 await wikidata('wikidata_seats.json', SEAT_SPARQL)
 console.log('done')

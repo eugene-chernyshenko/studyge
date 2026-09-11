@@ -32,6 +32,21 @@ const PROBES = {
     ['Рейкьявик', -21.8277, 64.1265, 'Исландия'],
     ['Веллингтон', 174.7762, -41.2865, 'Новая Зеландия'],
   ],
+  'russia-subjects': [
+    ['Москва', 37.6173, 55.7558, 'Москва'],
+    ['Санкт-Петербург', 30.3351, 59.9343, 'Санкт-Петербург'],
+    ['Новосибирск', 82.9346, 55.0084, 'Новосибирская область'],
+    ['Владивосток', 131.8869, 43.1155, 'Приморский край'],
+    ['Казань', 49.1064, 55.7963, 'Татарстан'],
+    ['Калининград', 20.5106, 54.7104, 'Калининградская область'],
+    // Anadyr sits past 180°, which is exactly what the rotated projection is for.
+    ['Анадырь', 177.5083, 64.7314, 'Чукотский автономный округ'],
+    ['Мурманск', 33.0856, 68.9585, 'Мурманская область'],
+    ['Барнаул', 83.7636, 53.3548, 'Алтайский край'],
+    ['Горно-Алтайск', 85.9601, 51.9582, 'Республика Алтай'],
+    ['Симферополь', 34.1024, 44.9521, 'Республика Крым'],
+    ['Донецк', 37.8028, 48.0159, 'Донецкая область'],
+  ],
   'slovenia-municipalities': [
     ['Любляна', 14.5058, 46.0569, 'Любляна'],
     ['Марибор', 15.6467, 46.5547, 'Марибор'],
@@ -123,8 +138,13 @@ for (const [id, probes] of Object.entries(PROBES)) {
 }
 
 // --- areas against Wikidata, which had no hand in building these files ---
-const areaRows = JSON.parse(await readFile(resolve(CACHE, 'wikidata_areas.json'), 'utf8'))
-  .results.bindings
+const areaRows = (
+  await Promise.all(
+    ['wikidata_areas_countries.json', 'wikidata_areas_subdivisions.json'].map(async (file) =>
+      JSON.parse(await readFile(resolve(CACHE, file), 'utf8')).results.bindings,
+    ),
+  )
+).flat()
 const SQUARE_KM = 'http://www.wikidata.org/entity/Q712226'
 // Matching is by ISO code only. Names collide across levels — Wikidata has both
 // the Agadez region (667 799 km²) and the Agadez commune (1 001 km²) as "Агадес",
