@@ -3,6 +3,7 @@ import { loadManifest } from '../data/loadSet'
 import type { GameMode, MapSetMeta, QuizMode } from '../data/types'
 import { useGame, progressKey } from '../game/store'
 import { mistakeCount } from '../game/progress'
+import { plural } from '../data/plural'
 
 const MODE_LABELS: Record<GameMode, string> = {
   learn: 'Изучать',
@@ -68,7 +69,7 @@ export function Menu() {
                     <div className="set__info">
                       <span className="set__title">{meta.title}</span>
                       <span className="set__meta">
-                        {meta.count} {meta.unitPlural}
+                        {meta.count} {plural(meta.count, meta.unit)}
                         {best ? ` · рекорд ${best}/10` : ''}
                       </span>
                     </div>

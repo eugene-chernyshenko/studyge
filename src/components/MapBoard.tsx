@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { geoConicEqualArea, geoEqualEarth, geoMercator, geoPath } from 'd3-geo'
+import { geoAlbersUsa, geoConicEqualArea, geoEqualEarth, geoMercator, geoPath } from 'd3-geo'
 import type { MapSet, Region } from '../data/types'
 import { useZoomPan } from './useZoomPan'
 
@@ -28,6 +28,8 @@ interface Props {
 
 function buildProjection(meta: MapSet['meta']) {
   if (meta.projection === 'equalEarth') return geoEqualEarth()
+  // Composite: Alaska and Hawaii are drawn as insets rather than in place.
+  if (meta.projection === 'albersUsa') return geoAlbersUsa()
   if (meta.projection !== 'conic') return geoMercator()
   const projection = geoConicEqualArea()
   if (meta.rotate) projection.rotate(meta.rotate)

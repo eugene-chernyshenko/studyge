@@ -396,7 +396,7 @@ for (const set of SETS) {
     title: set.title,
     group: set.group,
     country: set.country ?? null,
-    unitPlural: set.unitPlural,
+    unit: set.unit,
     count: collection.features.length,
     modes: set.modes,
     projection: set.projection,

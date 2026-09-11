@@ -8,10 +8,11 @@ export interface MapSetMeta {
   title: string
   group: string
   country: string | null
-  unitPlural: string
+  /** Russian needs three forms: 1 штат, 2 штата, 5 штатов. */
+  unit: [string, string, string]
   count: number
   modes: GameMode[]
-  projection: 'equalEarth' | 'mercator' | 'conic'
+  projection: 'equalEarth' | 'mercator' | 'conic' | 'albersUsa'
   /** Only for 'conic': rotation and standard parallels, for countries too wide
    *  or too far east for an unrotated projection (Russia crosses 180°). */
   rotate?: [number, number]
