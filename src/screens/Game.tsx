@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { MapBoard } from '../components/MapBoard'
 import { Modal } from '../components/Modal'
 import { useGame } from '../game/store'
+import { cacheBust } from '../version'
 import { QUESTION_SECONDS, promptFor } from '../game/quiz'
 
 /** Palette for regions already answered — bright and distinguishable side by side. */
@@ -102,7 +103,7 @@ export function Game() {
                 Флаг какой страны?{' '}
                 <img
                   className="flag"
-                  src={`${import.meta.env.BASE_URL}flags/${question.region.iso2}.svg`}
+                  src={`${import.meta.env.BASE_URL}flags/${question.region.iso2}.svg${cacheBust}`}
                   alt=""
                   width={34}
                   height={24}

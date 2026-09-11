@@ -1,6 +1,7 @@
 import { feature } from 'topojson-client'
 import type { GeometryCollection, Topology } from 'topojson-specification'
 import type { MapSet, MapSetMeta, Region } from './types'
+import { cacheBust } from '../version'
 
 const BASE = import.meta.env.BASE_URL
 
@@ -8,7 +9,7 @@ let manifestPromise: Promise<MapSetMeta[]> | undefined
 const setCache = new Map<string, Promise<MapSet>>()
 
 export function loadManifest(): Promise<MapSetMeta[]> {
-  manifestPromise ??= fetch(`${BASE}data/manifest.json`).then((r) => {
+  manifestPromise ??= fetch(`${BASE}data/manifest.json${cacheBust}`).then((r) => {
     if (!r.ok) throw new Error(`manifest: HTTP ${r.status}`)
     return r.json() as Promise<MapSetMeta[]>
   })
@@ -20,7 +21,7 @@ export function loadSet(meta: MapSetMeta): Promise<MapSet> {
   const cached = setCache.get(meta.id)
   if (cached) return cached
 
-  const promise = fetch(`${BASE}${meta.file}`)
+  const promise = fetch(`${BASE}${meta.file}${cacheBust}`)
     .then((r) => {
       if (!r.ok) throw new Error(`${meta.id}: HTTP ${r.status}`)
       return r.json() as Promise<Topology>

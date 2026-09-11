@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { MapBoard } from '../components/MapBoard'
 import { useGame } from '../game/store'
+import { cacheBust } from '../version'
 import type { Region } from '../data/types'
 
 const EMPTY = new Map<string, string>()
@@ -69,7 +70,7 @@ export function Learn() {
                 {region.iso2 ? (
                   <img
                     className="flag flag--small"
-                    src={`${import.meta.env.BASE_URL}flags/${region.iso2}.svg`}
+                    src={`${import.meta.env.BASE_URL}flags/${region.iso2}.svg${cacheBust}`}
                     alt=""
                     width={24}
                     height={18}
