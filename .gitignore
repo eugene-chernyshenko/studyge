@@ -1,0 +1,13 @@
+node_modules
+dist
+.DS_Store
+*.local
+
+# Raw geodata downloads — rebuild with `npm run data`
+.data-cache
+
+# Copied out of node_modules by scripts/copy-flags.mjs
+public/flags
+
+# Playwright MCP run artifacts
+.playwright-mcp

@@ -1,0 +1,193 @@
+[
+  {
+    "id": "world-countries",
+    "title": "Страны мира",
+    "group": "Мир",
+    "country": null,
+    "unitPlural": "стран",
+    "count": 192,
+    "modes": [
+      "learn",
+      "locate",
+      "flag",
+      "capital"
+    ],
+    "projection": "equalEarth",
+    "bbox": [
+      -25.68,
+      -55.63,
+      -34.8,
+      83.12
+    ],
+    "file": "data/world-countries.json",
+    "attribution": "Natural Earth (public domain)"
+  },
+  {
+    "id": "slovenia-municipalities",
+    "title": "Общины Словении",
+    "group": "Административные единицы",
+    "country": "Словения",
+    "unitPlural": "общин",
+    "count": 212,
+    "modes": [
+      "learn",
+      "locate"
+    ],
+    "projection": "mercator",
+    "bbox": [
+      13.38,
+      45.42,
+      16.6,
+      46.88
+    ],
+    "file": "data/slovenia-municipalities.json",
+    "attribution": "geoBoundaries (CC BY 4.0)"
+  },
+  {
+    "id": "timor-municipalities",
+    "title": "Муниципалитеты Восточного Тимора",
+    "group": "Административные единицы",
+    "country": "Восточный Тимор",
+    "unitPlural": "муниципалитетов",
+    "count": 13,
+    "modes": [
+      "learn",
+      "locate"
+    ],
+    "projection": "mercator",
+    "bbox": [
+      124.03,
+      -9.49,
+      127.3,
+      -8.31
+    ],
+    "file": "data/timor-municipalities.json",
+    "attribution": "Natural Earth (public domain)"
+  },
+  {
+    "id": "myanmar-states",
+    "title": "Штаты и области Мьянмы",
+    "group": "Административные единицы",
+    "country": "Мьянма",
+    "unitPlural": "штатов и областей",
+    "count": 14,
+    "modes": [
+      "learn",
+      "locate"
+    ],
+    "projection": "mercator",
+    "bbox": [
+      92.17,
+      10.03,
+      101.17,
+      28.53
+    ],
+    "file": "data/myanmar-states.json",
+    "attribution": "Natural Earth (public domain)"
+  },
+  {
+    "id": "niger-regions",
+    "title": "Регионы Нигера",
+    "group": "Административные единицы",
+    "country": "Нигер",
+    "unitPlural": "регионов",
+    "count": 8,
+    "modes": [
+      "learn",
+      "locate"
+    ],
+    "projection": "mercator",
+    "bbox": [
+      0.19,
+      11.91,
+      15.95,
+      23.52
+    ],
+    "file": "data/niger-regions.json",
+    "attribution": "Natural Earth (public domain)"
+  },
+  {
+    "id": "mali-regions",
+    "title": "Регионы Мали",
+    "group": "Административные единицы",
+    "country": "Мали",
+    "unitPlural": "регионов",
+    "count": 9,
+    "modes": [
+      "learn",
+      "locate"
+    ],
+    "projection": "mercator",
+    "bbox": [
+      -12.22,
+      10.19,
+      4.24,
+      25
+    ],
+    "file": "data/mali-regions.json",
+    "attribution": "Natural Earth (public domain)"
+  },
+  {
+    "id": "chad-provinces",
+    "title": "Регионы Чада",
+    "group": "Административные единицы",
+    "country": "Чад",
+    "unitPlural": "регионов",
+    "count": 23,
+    "modes": [
+      "learn",
+      "locate"
+    ],
+    "projection": "mercator",
+    "bbox": [
+      13.47,
+      7.44,
+      24,
+      23.5
+    ],
+    "file": "data/chad-provinces.json",
+    "attribution": "geoBoundaries (CC BY 4.0)"
+  },
+  {
+    "id": "car-prefectures",
+    "title": "Префектуры ЦАР",
+    "group": "Административные единицы",
+    "country": "Центральноафриканская Республика",
+    "unitPlural": "префектур",
+    "count": 17,
+    "modes": [
+      "learn",
+      "locate"
+    ],
+    "projection": "mercator",
+    "bbox": [
+      14.4,
+      2.24,
+      27.39,
+      11
+    ],
+    "file": "data/car-prefectures.json",
+    "attribution": "Natural Earth (public domain)"
+  },
+  {
+    "id": "south-sudan-states",
+    "title": "Штаты Южного Судана",
+    "group": "Административные единицы",
+    "country": "Южный Судан",
+    "unitPlural": "штатов",
+    "count": 10,
+    "modes": [
+      "learn",
+      "locate"
+    ],
+    "projection": "mercator",
+    "bbox": [
+      24.13,
+      3.55,
+      35.8,
+      12.22
+    ],
+    "file": "data/south-sudan-states.json",
+    "attribution": "Natural Earth (public domain)"
+  }
+]
