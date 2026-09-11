@@ -1,7 +1,7 @@
 {
   "name": "studyge",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "npm run flags && vite",
@@ -31,5 +31,7 @@
     "oxlint": "^1.81.0",
     "typescript": "~6.0.2",
     "vite": "^8.3.0"
-  }
+  },
+  "description": "Браузерная версия StudyGe — географическая викторина по карте",
+  "license": "MIT"
 }
