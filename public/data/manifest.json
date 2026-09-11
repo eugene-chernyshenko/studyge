@@ -135,6 +135,39 @@
     "attribution": "Natural Earth (public domain)"
   },
   {
+    "id": "australia-states",
+    "title": "Штаты и территории Австралии",
+    "group": "Административные единицы",
+    "country": "Австралия",
+    "unit": [
+      "единица",
+      "единицы",
+      "единиц"
+    ],
+    "count": 8,
+    "modes": [
+      "learn",
+      "locate"
+    ],
+    "projection": "conic",
+    "rotate": [
+      -134,
+      0
+    ],
+    "parallels": [
+      -36,
+      -18
+    ],
+    "bbox": [
+      112.92,
+      -43.64,
+      153.63,
+      -9.24
+    ],
+    "file": "data/australia-states.json",
+    "attribution": "Natural Earth (public domain)"
+  },
+  {
     "id": "argentina-provinces",
     "title": "Провинции Аргентины",
     "group": "Административные единицы",

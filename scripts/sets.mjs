@@ -90,6 +90,30 @@ export const SETS = [
     attribution: 'Natural Earth (public domain)',
   },
   {
+    id: 'australia-states',
+    title: 'Штаты и территории Австралии',
+    group: 'Административные единицы',
+    country: 'Австралия',
+    unit: ['единица', 'единицы', 'единиц'],
+    source: {
+      kind: 'ne-admin1',
+      adm0: 'AUS',
+      // Natural Earth carries three island entries alongside the eight units:
+      // Macquarie belongs to Tasmania, Lord Howe to New South Wales (it even
+      // shares its AU-NSW code), and Jervis Bay is a 70 km² enclave.
+      excludeNames: ['Macquarie Island', 'Lord Howe Island', 'Jervis Bay Territory'],
+    },
+    projection: 'conic',
+    rotate: [-134, 0],
+    parallels: [-36, -18],
+    // Darwin sits on a narrow point: 12% left it 4.2 km offshore, 40% brings it
+    // to 0.5 km. It never lands inside — the coastline of the source is simply
+    // drawn past it — but the outline is much better at this level.
+    simplify: '40%',
+    modes: ['learn', 'locate'],
+    attribution: 'Natural Earth (public domain)',
+  },
+  {
     id: 'argentina-provinces',
     title: 'Провинции Аргентины',
     group: 'Административные единицы',

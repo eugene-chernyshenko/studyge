@@ -209,12 +209,15 @@ function fromNuts(country) {
     })
 }
 
-function fromAdmin1(adm0, { include = [], exclude = [] } = {}) {
+function fromAdmin1(adm0, { include = [], exclude = [], excludeNames = [] } = {}) {
   const isoOf = (p) => (p.iso_3166_2 && p.iso_3166_2 !== '-99' ? p.iso_3166_2 : null)
   return admin1.features
     .filter((f) => {
       const iso = isoOf(f.properties)
       if (iso && exclude.includes(iso)) return false
+      // Some outliers cannot be excluded by code: Natural Earth files Lord Howe
+      // Island under the same AU-NSW as New South Wales itself.
+      if (excludeNames.includes(f.properties.name)) return false
       return f.properties.adm0_a3 === adm0 || (iso && include.includes(iso))
     })
     .map((f) => {
