@@ -52,6 +52,27 @@
     "attribution": "Natural Earth (public domain)"
   },
   {
+    "id": "ukraine-oblasts",
+    "title": "Области Украины",
+    "group": "Административные единицы",
+    "country": "Украина",
+    "unitPlural": "единиц",
+    "count": 21,
+    "modes": [
+      "learn",
+      "locate"
+    ],
+    "projection": "mercator",
+    "bbox": [
+      22.13,
+      45.21,
+      38.06,
+      52.37
+    ],
+    "file": "data/ukraine-oblasts.json",
+    "attribution": "Natural Earth (public domain)"
+  },
+  {
     "id": "slovenia-municipalities",
     "title": "Общины Словении",
     "group": "Административные единицы",

@@ -42,6 +42,25 @@ export const SETS = [
     attribution: 'Natural Earth (public domain)',
   },
   {
+    id: 'ukraine-oblasts',
+    title: 'Области Украины',
+    group: 'Административные единицы',
+    country: 'Украина',
+    unitPlural: 'единиц',
+    source: {
+      kind: 'ne-admin1',
+      adm0: 'UKR',
+      // The four oblasts that the set of Russian subjects already covers, so the
+      // two sets stay disjoint. Crimea and Sevastopol are filed under Russia in
+      // Natural Earth and are therefore absent here as well.
+      exclude: ['UA-14', 'UA-09', 'UA-23', 'UA-65'],
+    },
+    projection: 'mercator',
+    simplify: '10%',
+    modes: ['learn', 'locate'],
+    attribution: 'Natural Earth (public domain)',
+  },
+  {
     id: 'slovenia-municipalities',
     title: 'Общины Словении',
     group: 'Административные единицы',
