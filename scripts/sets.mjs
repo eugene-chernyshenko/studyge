@@ -90,6 +90,20 @@ export const SETS = [
     attribution: 'Natural Earth (public domain)',
   },
   {
+    id: 'slovenia-regions',
+    title: 'Регионы Словении',
+    group: 'Административные единицы',
+    country: 'Словения',
+    unit: ['регион', 'региона', 'регионов'],
+    // The 12 statistical regions are NUTS level 3; Natural Earth and
+    // geoBoundaries only know municipalities and the two cohesion regions.
+    source: { kind: 'nuts', country: 'SI' },
+    projection: 'mercator',
+    simplify: '25%',
+    modes: ['learn', 'locate'],
+    attribution: '© EuroGeographics (Eurostat GISCO)',
+  },
+  {
     id: 'slovenia-municipalities',
     title: 'Общины Словении',
     group: 'Административные единицы',

@@ -101,8 +101,8 @@ export function Menu() {
       ))}
 
       <footer className="menu__foot">
-        Границы: Natural Earth (public domain) и geoBoundaries (CC BY 4.0). Названия — Natural Earth и
-        Wikidata.
+        Границы: Natural Earth (public domain), geoBoundaries (CC BY 4.0) и Eurostat GISCO
+        (© EuroGeographics). Названия — Natural Earth и Wikidata.
       </footer>
     </div>
   )

@@ -80,6 +80,15 @@ const PROBES = {
     ['Денвер', -104.9903, 39.7392, 'Колорадо'],
     ['Сиэтл', -122.3321, 47.6062, 'Вашингтон'],
   ],
+  'slovenia-regions': [
+    ['Любляна', 14.5058, 46.0569, 'Средняя Словения'],
+    ['Марибор', 15.6467, 46.5547, 'Подравска'],
+    ['Копер', 13.73, 45.5481, 'Обално-Крашка'],
+    ['Мурска-Собота', 16.1667, 46.6583, 'Помурска'],
+    ['Ново-Место', 15.17, 45.8033, 'Юго-Восточная Словения'],
+    ['Крань', 14.3554, 46.2389, 'Гореньский регион'],
+    ['Нова-Горица', 13.6483, 45.9553, 'Горишка'],
+  ],
   'slovenia-municipalities': [
     ['Любляна', 14.5058, 46.0569, 'Любляна'],
     ['Марибор', 15.6467, 46.5547, 'Марибор'],
@@ -173,7 +182,11 @@ for (const [id, probes] of Object.entries(PROBES)) {
 // --- areas against Wikidata, which had no hand in building these files ---
 const areaRows = (
   await Promise.all(
-    ['wikidata_areas_countries.json', 'wikidata_areas_subdivisions.json'].map(async (file) =>
+    [
+      'wikidata_areas_countries.json',
+      'wikidata_areas_subdivisions.json',
+      'wikidata_nuts_areas.json',
+    ].map(async (file) =>
       JSON.parse(await readFile(resolve(CACHE, file), 'utf8')).results.bindings,
     ),
   )
@@ -186,7 +199,7 @@ const publishedByIso = new Map()
 for (const row of areaRows) {
   if (row.unit.value !== SQUARE_KM) continue // a couple of entries are in m²
   const km2 = Number(row.area.value)
-  for (const iso of [row.iso3?.value, row.iso2?.value]) {
+  for (const iso of [row.iso3?.value, row.iso2?.value, row.nuts?.value]) {
     if (iso && !publishedByIso.has(iso)) publishedByIso.set(iso, km2)
   }
 }

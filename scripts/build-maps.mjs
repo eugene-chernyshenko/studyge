@@ -20,13 +20,17 @@ const OVERRIDES = resolve(import.meta.dirname, 'ru-overrides.json')
 
 const readJson = async (p) => JSON.parse(await readFile(p, 'utf8'))
 
-const [admin1, admin0, places, wikidata, areasRaw, seatsRaw, overrides] = await Promise.all([
+const [admin1, admin0, places, nuts3, wikidata, areasRaw, seatsRaw, nutsRuRaw, nutsSeatsRaw, overrides] =
+  await Promise.all([
   readJson(resolve(CACHE, 'ne_10m_admin_1.geojson')),
   readJson(resolve(CACHE, 'ne_10m_admin_0.geojson')),
   readJson(resolve(CACHE, 'ne_10m_places.geojson')),
+  readJson(resolve(CACHE, 'nuts3.geojson')),
   readJson(resolve(CACHE, 'wikidata_admin_ru.json')),
   readJson(resolve(CACHE, 'wikidata_areas_subdivisions.json')),
   readJson(resolve(CACHE, 'wikidata_seats.json')),
+  readJson(resolve(CACHE, 'wikidata_nuts_ru.json')),
+  readJson(resolve(CACHE, 'wikidata_nuts_seats.json')),
   existsSync(OVERRIDES) ? readJson(OVERRIDES) : {},
 ])
 
@@ -93,14 +97,22 @@ function approxKm2(geometry, lat) {
 // Niger's Tillabéri under Niamey). So NE points are attached by geometry instead.
 const POINT = /Point\(([-\d.]+) ([-\d.]+)\)/
 
+// Keyed by whatever code identifies the unit — ISO 3166-2 or NUTS; the two
+// code spaces do not collide, so one lookup serves both kinds of set.
 const seatByIso = new Map()
-for (const row of seatsRaw.results.bindings) {
-  const m = row.coord?.value?.match(POINT)
-  if (!m || seatByIso.has(row.iso.value)) continue
-  seatByIso.set(row.iso.value, {
-    name: row.seatRu?.value ?? row.seatEn?.value ?? null,
-    at: [Number(m[1]), Number(m[2])],
-  })
+for (const [rows, key] of [
+  [seatsRaw.results.bindings, 'iso'],
+  [nutsSeatsRaw.results.bindings, 'nuts'],
+]) {
+  for (const row of rows) {
+    const m = row.coord?.value?.match(POINT)
+    const code = row[key]?.value
+    if (!m || !code || seatByIso.has(code)) continue
+    seatByIso.set(code, {
+      name: row.seatRu?.value ?? row.seatEn?.value ?? null,
+      at: [Number(m[1]), Number(m[2])],
+    })
+  }
 }
 
 /** Town points that can stand in for a missing seat, with their coordinates. */
@@ -166,6 +178,32 @@ function fromAdmin0() {
           iso2: iso2Of(p),
           capital: cap?.ru ?? CAPITAL_FALLBACKS[p.ADM0_A3] ?? null,
           capitalAt: cap ? cap.at.map((n) => Math.round(n * 1000) / 1000) : null,
+        },
+      }
+    })
+}
+
+const nutsRu = new Map(
+  nutsRuRaw.results.bindings.map((row) => [
+    row.nuts.value,
+    { ru: row.ru?.value ?? null, en: row.en?.value ?? null },
+  ]),
+)
+
+/** Eurostat NUTS regions for one country, keyed by their NUTS code. */
+function fromNuts(country) {
+  return nuts3.features
+    .filter((f) => f.properties.CNTR_CODE === country)
+    .map((f) => {
+      const p = f.properties
+      const known = nutsRu.get(p.NUTS_ID)
+      return {
+        type: 'Feature',
+        geometry: f.geometry,
+        properties: {
+          id: p.NUTS_ID,
+          name: overrides[p.NUTS_ID] || known?.ru || p.NAME_LATN,
+          nameEn: p.NAME_LATN,
         },
       }
     })
@@ -351,6 +389,8 @@ for (const set of SETS) {
       ? fromAdmin0()
       : set.source.kind === 'ne-admin1'
         ? fromAdmin1(set.source.adm0, set.source)
+        : set.source.kind === 'nuts'
+        ? fromNuts(set.source.country)
         : await fromGeoBoundaries(set.source.file, set.source.isoPrefix)
 
   if (!features.length) throw new Error(`${set.id}: no features matched`)

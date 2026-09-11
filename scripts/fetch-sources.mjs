@@ -7,6 +7,8 @@ const CACHE = resolve(import.meta.dirname, '../.data-cache')
 const UA = 'studyge-dev/0.1 (https://github.com/; contact: chernyshenko.eugene@gmail.com)'
 
 const NE = 'https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson'
+// Eurostat's NUTS geometries: the only open source for EU statistical regions.
+const GISCO = 'https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson'
 
 /** @type {{file: string, url: string}[]} */
 const DOWNLOADS = [
@@ -14,6 +16,7 @@ const DOWNLOADS = [
   { file: 'ne_10m_admin_0.geojson', url: `${NE}/ne_10m_admin_0_countries.geojson` },
   { file: 'ne_10m_places.geojson', url: `${NE}/ne_10m_populated_places.geojson` },
   { file: 'ne_10m_land.geojson', url: `${NE}/ne_10m_land.geojson` },
+  { file: 'nuts3.geojson', url: `${GISCO}/NUTS_RG_01M_2024_4326_LEVL_3.geojson` },
 ]
 
 // Countries where Natural Earth's admin-1 set is incomplete or outdated.
@@ -66,6 +69,28 @@ const SUBDIVISION_AREA_SPARQL = `SELECT ?item ?iso2 ?area ?unit ?rank WHERE {
   ?item p:P2046 ?st .
   ?st psv:P2046 ?v ; wikibase:rank ?rank .
   ?v wikibase:quantityAmount ?area ; wikibase:quantityUnit ?unit .
+}`
+
+// Russian names for NUTS regions, keyed by the NUTS code that GISCO ships.
+const NUTS_NAME_SPARQL = `SELECT ?nuts ?ru ?en WHERE {
+  ?item wdt:P31 wd:Q1474320 ; wdt:P605 ?nuts .
+  OPTIONAL { ?item rdfs:label ?ru FILTER(lang(?ru)="ru") }
+  OPTIONAL { ?item rdfs:label ?en FILTER(lang(?en)="en") }
+}`
+
+const NUTS_AREA_SPARQL = `SELECT ?nuts ?area ?unit ?rank WHERE {
+  ?item wdt:P31 wd:Q1474320 ; wdt:P605 ?nuts .
+  ?item p:P2046 ?st .
+  ?st psv:P2046 ?v ; wikibase:rank ?rank .
+  ?v wikibase:quantityAmount ?area ; wikibase:quantityUnit ?unit .
+}`
+
+// Principal city of each NUTS region, keyed by NUTS code rather than ISO.
+const NUTS_SEAT_SPARQL = `SELECT ?nuts ?seatRu ?seatEn ?coord WHERE {
+  ?item wdt:P31 wd:Q1474320 ; wdt:P605 ?nuts ; wdt:P36 ?seat .
+  ?seat wdt:P625 ?coord .
+  OPTIONAL { ?seat rdfs:label ?seatRu FILTER(lang(?seatRu)="ru") }
+  OPTIONAL { ?seat rdfs:label ?seatEn FILTER(lang(?seatEn)="en") }
 }`
 
 // Administrative seats: which town is the centre of each unit, and where it is.
@@ -150,4 +175,7 @@ await wikidata('wikidata_admin_ru.json', SPARQL)
 await wikidata('wikidata_areas_countries.json', COUNTRY_AREA_SPARQL)
 await wikidata('wikidata_areas_subdivisions.json', SUBDIVISION_AREA_SPARQL)
 await wikidata('wikidata_seats.json', SEAT_SPARQL)
+await wikidata('wikidata_nuts_ru.json', NUTS_NAME_SPARQL)
+await wikidata('wikidata_nuts_seats.json', NUTS_SEAT_SPARQL)
+await wikidata('wikidata_nuts_areas.json', NUTS_AREA_SPARQL)
 console.log('done')

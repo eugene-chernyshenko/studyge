@@ -135,6 +135,31 @@
     "attribution": "Natural Earth (public domain)"
   },
   {
+    "id": "slovenia-regions",
+    "title": "Регионы Словении",
+    "group": "Административные единицы",
+    "country": "Словения",
+    "unit": [
+      "регион",
+      "региона",
+      "регионов"
+    ],
+    "count": 12,
+    "modes": [
+      "learn",
+      "locate"
+    ],
+    "projection": "mercator",
+    "bbox": [
+      13.39,
+      45.42,
+      16.57,
+      46.88
+    ],
+    "file": "data/slovenia-regions.json",
+    "attribution": "© EuroGeographics (Eurostat GISCO)"
+  },
+  {
     "id": "slovenia-municipalities",
     "title": "Общины Словении",
     "group": "Административные единицы",
