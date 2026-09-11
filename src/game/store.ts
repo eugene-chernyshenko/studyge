@@ -32,6 +32,7 @@ interface GameState {
   next(): void
   tick(delta: number): void
   setPaused(paused: boolean): void
+  setTimerEnabled(enabled: boolean): void
   quit(): void
 }
 
@@ -108,16 +109,26 @@ export const useGame = create<GameState>((set, get) => {
     },
 
     confirm() {
-      const { phase, questions, index, selectedId, timeLeft, answers } = get()
+      const { phase, questions, index, selectedId, timeLeft, answers, progress, set: mapSet, mode } = get()
       if (phase !== 'playing') return
       const question = questions[index]
       const correct = selectedId === question.region.id
+      const coins = coinsFor(correct, timeLeft, progress.timerEnabled)
+
+      // Bank the result now. Crediting only at the end of a round meant that
+      // leaving after eight correct answers threw all of them away.
+      const key = mapSet ? progressKey(mapSet.meta.id, mode) : ''
+      const updated: Progress = {
+        ...progress,
+        coins: progress.coins + coins,
+        mistakes: recordAnswer(progress.mistakes, key, question.region.id, correct),
+      }
+      saveProgress(updated)
+
       set({
         phase: 'revealing',
-        answers: [
-          ...answers,
-          { question, pickedId: selectedId, correct, timeLeft, coins: coinsFor(correct, timeLeft) },
-        ],
+        progress: updated,
+        answers: [...answers, { question, pickedId: selectedId, correct, timeLeft, coins }],
       })
     },
 
@@ -128,24 +139,20 @@ export const useGame = create<GameState>((set, get) => {
         return
       }
 
+      // Coins and mistakes were already banked per answer; only the record is left.
       const key = mapSet ? progressKey(mapSet.meta.id, mode) : ''
       const rightCount = answers.filter((a) => a.correct).length
-      const mistakes = answers.reduce(
-        (log, answer) => recordAnswer(log, key, answer.question.region.id, answer.correct),
-        progress.mistakes,
-      )
       const updated: Progress = {
-        coins: progress.coins + answers.reduce((sum, a) => sum + a.coins, 0),
+        ...progress,
         best: { ...progress.best, [key]: Math.max(progress.best[key] ?? 0, rightCount) },
-        mistakes,
       }
       saveProgress(updated)
       set({ phase: 'finished', progress: updated })
     },
 
     tick(delta) {
-      const { phase, paused, timeLeft } = get()
-      if (phase !== 'playing' || paused) return
+      const { phase, paused, timeLeft, progress } = get()
+      if (phase !== 'playing' || paused || !progress.timerEnabled) return
       const left = timeLeft - delta
       if (left > 0) {
         set({ timeLeft: left })
@@ -158,6 +165,12 @@ export const useGame = create<GameState>((set, get) => {
 
     setPaused(paused) {
       set({ paused })
+    },
+
+    setTimerEnabled(enabled) {
+      const updated = { ...get().progress, timerEnabled: enabled }
+      saveProgress(updated)
+      set({ progress: updated, timeLeft: QUESTION_SECONDS })
     },
 
     quit() {

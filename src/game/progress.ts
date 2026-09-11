@@ -6,13 +6,15 @@ export interface Progress {
   best: Record<string, number>
   /** How often each region was missed, keyed by `${setId}:${mode}` then region id. */
   mistakes: MistakeLog
+  /** Players who want to study rather than race can switch the clock off. */
+  timerEnabled: boolean
 }
 
 const KEY = 'studyge.progress.v3'
 // v2 keyed mistakes by Natural Earth's internal region codes; v3 uses ISO 3166-2,
 // so those entries can no longer be matched and are dropped on upgrade.
 const LEGACY_KEY = 'studyge.progress.v2'
-const EMPTY: Progress = { coins: 0, best: {}, mistakes: {} }
+const EMPTY: Progress = { coins: 0, best: {}, mistakes: {}, timerEnabled: true }
 
 function parse(raw: string): Progress {
   const parsed = JSON.parse(raw) as Partial<Progress>
@@ -20,6 +22,7 @@ function parse(raw: string): Progress {
     coins: parsed.coins ?? 0,
     best: parsed.best ?? {},
     mistakes: parsed.mistakes ?? {},
+    timerEnabled: parsed.timerEnabled ?? true,
   }
 }
 

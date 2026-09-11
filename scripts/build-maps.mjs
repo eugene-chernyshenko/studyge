@@ -20,12 +20,13 @@ const OVERRIDES = resolve(import.meta.dirname, 'ru-overrides.json')
 
 const readJson = async (p) => JSON.parse(await readFile(p, 'utf8'))
 
-const [admin1, admin0, places, wikidata, areasRaw, overrides] = await Promise.all([
+const [admin1, admin0, places, wikidata, areasRaw, seatsRaw, overrides] = await Promise.all([
   readJson(resolve(CACHE, 'ne_10m_admin_1.geojson')),
   readJson(resolve(CACHE, 'ne_10m_admin_0.geojson')),
   readJson(resolve(CACHE, 'ne_10m_places.geojson')),
   readJson(resolve(CACHE, 'wikidata_admin_ru.json')),
   readJson(resolve(CACHE, 'wikidata_areas.json')),
+  readJson(resolve(CACHE, 'wikidata_seats.json')),
   existsSync(OVERRIDES) ? readJson(OVERRIDES) : {},
 ])
 
@@ -85,6 +86,41 @@ function approxKm2(geometry, lat) {
   return planarArea(geometry) * 110.574 * 111.32 * Math.cos((lat * Math.PI) / 180)
 }
 
+// --- administrative seats ------------------------------------------------
+// Two sources, because neither covers everything: Wikidata knows the seat of
+// 21 of Chad's 23 provinces but only 59 of Slovenia's 212 municipalities, while
+// Natural Earth has town points but mislabels which unit they belong to (it files
+// Niger's Tillabéri under Niamey). So NE points are attached by geometry instead.
+const POINT = /Point\(([-\d.]+) ([-\d.]+)\)/
+
+const seatByIso = new Map()
+for (const row of seatsRaw.results.bindings) {
+  const m = row.coord?.value?.match(POINT)
+  if (!m || seatByIso.has(row.iso.value)) continue
+  seatByIso.set(row.iso.value, {
+    name: row.seatRu?.value ?? row.seatEn?.value ?? null,
+    at: [Number(m[1]), Number(m[2])],
+  })
+}
+
+/** Town points that can stand in for a missing seat, with their coordinates. */
+const townPoints = places.features
+  .filter((f) => ['Admin-1 capital', 'Admin-0 capital'].includes(f.properties.FEATURECLA))
+  .map((f) => ({
+    name: f.properties.NAME_RU || f.properties.NAME,
+    at: f.geometry.coordinates,
+  }))
+
+/** Attach a seat to each feature: by ISO code first, then by which town falls inside. */
+function withSeats(features) {
+  return features.map((f) => {
+    const fromIso = seatByIso.get(f.properties.id)
+    const seat = fromIso ?? townPoints.find((t) => contains(f.geometry, t.at)) ?? null
+    if (!seat?.name) return f
+    return { ...f, properties: { ...f.properties, seat: seat.name, seatAt: seat.at.map((n) => Math.round(n * 1000) / 1000) } }
+  })
+}
+
 const capitalByIso = new Map()
 for (const f of places.features) {
   const p = f.properties
@@ -129,6 +165,7 @@ function fromAdmin0() {
           nameEn: p.NAME_EN || p.NAME,
           iso2: iso2Of(p),
           capital: cap?.ru ?? CAPITAL_FALLBACKS[p.ADM0_A3] ?? null,
+          capitalAt: cap ? cap.at.map((n) => Math.round(n * 1000) / 1000) : null,
         },
       }
     })
@@ -310,8 +347,10 @@ for (const set of SETS) {
         : await fromGeoBoundaries(set.source.file, set.source.isoPrefix)
 
   if (!features.length) throw new Error(`${set.id}: no features matched`)
+  const withCentres = set.source.kind === 'ne-admin0' ? features : withSeats(features)
+  const seatCount = withCentres.filter((f) => f.properties.seat).length
 
-  const input = JSON.stringify({ type: 'FeatureCollection', features })
+  const input = JSON.stringify({ type: 'FeatureCollection', features: withCentres })
   const files = { 'in.json': input }
   const cmd = ['-i in.json']
   if (set.clipToLand) {
@@ -360,8 +399,13 @@ for (const set of SETS) {
   })
 
   const kb = Math.round(JSON.stringify(topo).length / 1024)
+  const centres =
+    set.source.kind === 'ne-admin0'
+      ? collection.features.filter((f) => f.properties.capitalAt).length
+      : seatCount
   console.log(
     `${set.id.padEnd(26)} ${String(collection.features.length).padStart(4)} регионов  ${String(kb).padStart(5)} KB` +
+      `  центров ${String(centres).padStart(3)}/${collection.features.length}` +
       (missing.length ? `  ⚠ ${missing.length} без рус. названия` : ''),
   )
 }

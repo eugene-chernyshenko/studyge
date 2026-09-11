@@ -20,7 +20,7 @@ const ANSWERED_COLORS = [
 
 export function Game() {
   const { phase, set, mode, questions, index, selectedId, answers, timeLeft, paused, progress } = useGame()
-  const { select, confirm, next, tick, setPaused, quit } = useGame()
+  const { select, confirm, next, tick, setPaused, setTimerEnabled, quit } = useGame()
   const frame = useRef(0)
   const last = useRef(0)
 
@@ -63,7 +63,6 @@ export function Game() {
   if (!set) return null
   const question = questions[index]
   const lastAnswer = phase === 'revealing' ? answers[answers.length - 1] : null
-  const coinsThisRound = answers.reduce((sum, a) => sum + a.coins, 0)
   const isChoice = mode !== 'locate'
 
   return (
@@ -75,21 +74,28 @@ export function Game() {
         answered={answered}
         onSelect={select}
         onReady={onBoardReady}
+        showCentres
         interactive={phase === 'playing' && !isChoice}
       />
 
       <div className="hud hud--top">
+        <button className="icon-button" onClick={quit} aria-label="Выйти в меню" title="Выйти в меню">
+          ←
+        </button>
         <div className="pill pill--coins">
           <span className="coin" aria-hidden="true" />
-          {progress.coins + coinsThisRound}
+          {/* coins are banked per answer, so the total is already current */}
+          {progress.coins}
         </div>
 
         <div className="prompt">
-          <div
-            className="prompt__timer"
-            style={{ width: `${(timeLeft / QUESTION_SECONDS) * 100}%` }}
-            data-low={timeLeft < 5 || undefined}
-          />
+          {progress.timerEnabled ? (
+            <div
+              className="prompt__timer"
+              style={{ width: `${(timeLeft / QUESTION_SECONDS) * 100}%` }}
+              data-low={timeLeft < 8 || undefined}
+            />
+          ) : null}
           <span className="prompt__text">
             {mode === 'flag' ? (
               <>
@@ -168,6 +174,9 @@ export function Game() {
           <h2>Пауза</h2>
           <button className="confirm" onClick={() => setPaused(false)}>
             Продолжить
+          </button>
+          <button className="secondary" onClick={() => setTimerEnabled(!progress.timerEnabled)}>
+            {progress.timerEnabled ? 'Выключить таймер' : 'Включить таймер'}
           </button>
           <button className="ghost" onClick={quit}>
             Выйти в меню

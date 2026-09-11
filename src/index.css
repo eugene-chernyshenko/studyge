@@ -96,6 +96,12 @@ body {
   fill: var(--wrong);
 }
 
+.centre-dot {
+  fill: #334155;
+  stroke: #ffffff;
+  pointer-events: none;
+}
+
 .marker {
   fill: none;
   stroke: #16a34a;
@@ -451,6 +457,17 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+.menu__head-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mode--off {
+  background: var(--panel);
+  color: var(--ink-soft);
 }
 
 .menu__head h1 {

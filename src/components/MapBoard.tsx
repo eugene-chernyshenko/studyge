@@ -15,6 +15,8 @@ export interface Reveal {
 
 interface Props {
   onReady?: () => void
+  /** Draw a dot for each region's capital or administrative centre. */
+  showCentres?: boolean
   set: MapSet
   selectedId: string | null
   reveal: Reveal | null
@@ -42,7 +44,7 @@ function useSize(ref: React.RefObject<Element | null>) {
   return size
 }
 
-export function MapBoard({ set, selectedId, reveal, answered, onSelect, interactive, onReady }: Props) {
+export function MapBoard({ set, selectedId, reveal, answered, onSelect, interactive, onReady, showCentres }: Props) {
   const wrapperRef = useRef<HTMLDivElement>(null)
   const svgRef = useRef<SVGSVGElement>(null)
   const { width, height } = useSize(wrapperRef)
@@ -84,6 +86,15 @@ export function MapBoard({ set, selectedId, reveal, answered, onSelect, interact
   useEffect(() => {
     if (paths.length) onReady?.()
   }, [paths, onReady])
+
+  const centres = useMemo(() => {
+    if (!showCentres || !project) return []
+    return set.regions.flatMap((region) => {
+      if (!region.centreAt) return []
+      const at = project(region.centreAt)
+      return at ? [{ id: region.id, at }] : []
+    })
+  }, [showCentres, project, set.regions])
 
   // Ring the answer when the region itself is too small to read as a fill.
   const marker = useMemo(() => {
@@ -128,6 +139,17 @@ export function MapBoard({ set, selectedId, reveal, answered, onSelect, interact
               </path>
             )
           })}
+
+          {centres.map(({ id, at }) => (
+            <circle
+              key={`centre-${id}`}
+              cx={at[0]}
+              cy={at[1]}
+              r={2.4 / camera.k}
+              className="centre-dot"
+              strokeWidth={1 / camera.k}
+            />
+          ))}
 
           {marker ? (
             <circle

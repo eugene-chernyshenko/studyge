@@ -14,7 +14,7 @@ const MODE_LABELS: Record<GameMode, string> = {
 export function Menu() {
   const [sets, setSets] = useState<MapSetMeta[] | null>(null)
   const [failed, setFailed] = useState(false)
-  const { start, startReview, progress, error } = useGame()
+  const { start, startReview, setTimerEnabled, progress, error } = useGame()
 
   useEffect(() => {
     loadManifest().then(setSets, () => setFailed(true))
@@ -32,9 +32,18 @@ export function Menu() {
           <h1>StudyGe</h1>
           <p className="menu__sub">География мира</p>
         </div>
-        <div className="pill pill--coins">
-          <span className="coin" aria-hidden="true" />
-          {progress.coins}
+        <div className="menu__head-right">
+          <button
+            className={progress.timerEnabled ? 'mode' : 'mode mode--off'}
+            onClick={() => setTimerEnabled(!progress.timerEnabled)}
+            title="Отсчёт времени на каждый вопрос"
+          >
+            {progress.timerEnabled ? 'Таймер: вкл' : 'Таймер: выкл'}
+          </button>
+          <div className="pill pill--coins">
+            <span className="coin" aria-hidden="true" />
+            {progress.coins}
+          </div>
         </div>
       </header>
 

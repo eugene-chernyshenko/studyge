@@ -40,6 +40,9 @@ export function loadSet(meta: MapSetMeta): Promise<MapSet> {
           a: Number(p.a ?? 0),
           iso2: p.iso2 as string | undefined,
           capital: (p.capital as string | null) ?? null,
+          // Countries carry a capital, regions carry a seat — same thing on the map.
+          centre: ((p.capital ?? p.seat) as string | null) ?? null,
+          centreAt: ((p.capitalAt ?? p.seatAt) as [number, number] | null) ?? null,
           geometry: f.geometry,
         }
       })

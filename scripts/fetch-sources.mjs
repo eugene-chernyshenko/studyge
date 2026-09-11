@@ -49,6 +49,17 @@ const AREA_SPARQL = `SELECT ?item ?ru ?iso3 ?iso2 ?area ?unit ?rank WHERE {
   OPTIONAL { ?item rdfs:label ?ru FILTER(lang(?ru)="ru") }
 }`
 
+// Administrative seats: which town is the centre of each unit, and where it is.
+const SEAT_SPARQL = `SELECT ?item ?iso ?seatRu ?seatEn ?coord WHERE {
+  VALUES ?c { ${WIKIDATA_COUNTRIES.map((q) => `wd:${q}`).join(' ')} }
+  ?c wdt:P150 ?item .
+  ?item wdt:P300 ?iso .
+  ?item wdt:P36 ?seat .
+  ?seat wdt:P625 ?coord .
+  OPTIONAL { ?seat rdfs:label ?seatRu FILTER(lang(?seatRu)="ru") }
+  OPTIONAL { ?seat rdfs:label ?seatEn FILTER(lang(?seatEn)="en") }
+}`
+
 async function exists(path) {
   try {
     const s = await stat(path)
@@ -104,4 +115,5 @@ for (const d of DOWNLOADS) await download(d.url, d.file)
 for (const g of GEOBOUNDARIES) await geoBoundaries(g)
 await wikidata('wikidata_admin_ru.json', SPARQL)
 await wikidata('wikidata_areas.json', AREA_SPARQL)
+await wikidata('wikidata_seats.json', SEAT_SPARQL)
 console.log('done')

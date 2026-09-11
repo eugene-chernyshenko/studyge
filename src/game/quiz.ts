@@ -1,7 +1,8 @@
 import type { MapSet, QuizMode, Region } from '../data/types'
 
 export const ROUND_LENGTH = 10
-export const QUESTION_SECONDS = 15
+// 15 s was not enough to scan a map of 212 municipalities before answering.
+export const QUESTION_SECONDS = 30
 
 export interface Question {
   region: Region
@@ -104,9 +105,11 @@ export function buildReviewRound(
   return asQuestions(picked, mode, pool, random)
 }
 
-/** 10 coins for a correct answer plus up to 5 for answering quickly. */
-export function coinsFor(correct: boolean, timeLeft: number): number {
+/** 10 coins for a correct answer plus up to 5 for answering quickly.
+ *  With the clock off there is no speed to reward, so the bonus is full. */
+export function coinsFor(correct: boolean, timeLeft: number, timed = true): number {
   if (!correct) return 0
+  if (!timed) return 10
   return 10 + Math.round((Math.max(0, timeLeft) / QUESTION_SECONDS) * 5)
 }
 

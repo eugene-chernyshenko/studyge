@@ -27,6 +27,10 @@ export interface Region {
   a: number
   iso2?: string
   capital?: string | null
+  /** Administrative centre: the seat town of a region, or a country's capital. */
+  centre?: string | null
+  /** Where to draw the centre's dot, [lon, lat]. */
+  centreAt?: [number, number] | null
   geometry: GeoJSON.Geometry
 }
 

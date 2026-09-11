@@ -35,6 +35,7 @@ export function Learn() {
           reveal={null}
           answered={EMPTY}
           onSelect={select}
+          showCentres
           interactive
         />
         <div className="hud hud--top">
@@ -76,7 +77,7 @@ export function Learn() {
                   />
                 ) : null}
                 <span className="region-row__name">{region.name}</span>
-                {region.capital ? <span className="region-row__sub">{region.capital}</span> : null}
+                {region.centre ? <span className="region-row__sub">{region.centre}</span> : null}
               </button>
             </li>
           ))}
@@ -88,5 +89,6 @@ export function Learn() {
 }
 
 function describe(region: Region): string {
-  return region.capital ? `${region.name} · столица ${region.capital}` : region.name
+  if (region.capital) return `${region.name} · столица ${region.capital}`
+  return region.centre ? `${region.name} · центр ${region.centre}` : region.name
 }
