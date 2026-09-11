@@ -73,6 +73,27 @@
     "attribution": "Natural Earth (public domain)"
   },
   {
+    "id": "belarus-regions",
+    "title": "Области Беларуси",
+    "group": "Административные единицы",
+    "country": "Беларусь",
+    "unitPlural": "единиц",
+    "count": 7,
+    "modes": [
+      "learn",
+      "locate"
+    ],
+    "projection": "mercator",
+    "bbox": [
+      23.17,
+      51.24,
+      32.72,
+      56.16
+    ],
+    "file": "data/belarus-regions.json",
+    "attribution": "Natural Earth (public domain)"
+  },
+  {
     "id": "slovenia-municipalities",
     "title": "Общины Словении",
     "group": "Административные единицы",

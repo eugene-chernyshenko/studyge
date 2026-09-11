@@ -61,6 +61,18 @@ export const SETS = [
     attribution: 'Natural Earth (public domain)',
   },
   {
+    id: 'belarus-regions',
+    title: 'Области Беларуси',
+    group: 'Административные единицы',
+    country: 'Беларусь',
+    unitPlural: 'единиц',
+    source: { kind: 'ne-admin1', adm0: 'BLR' },
+    projection: 'mercator',
+    simplify: '14%',
+    modes: ['learn', 'locate'],
+    attribution: 'Natural Earth (public domain)',
+  },
+  {
     id: 'slovenia-municipalities',
     title: 'Общины Словении',
     group: 'Административные единицы',

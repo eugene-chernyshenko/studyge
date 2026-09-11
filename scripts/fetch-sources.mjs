@@ -34,6 +34,7 @@ const WIKIDATA_COUNTRIES = [
   'Q958', // Южный Судан
   'Q159', // Россия
   'Q212', // Украина — четыре области входят в набор субъектов
+  'Q184', // Беларусь
 ]
 const SPARQL = `SELECT ?c ?cEn ?item ?ru ?en ?native ?iso ?coord ?end WHERE {
   VALUES ?c { ${WIKIDATA_COUNTRIES.map((q) => `wd:${q}`).join(' ')} }
