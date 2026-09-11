@@ -643,7 +643,7 @@ body {
 }
 
 .region-row__name {
-  flex: 1;
+  flex: 1 1 auto;
   min-inline-size: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -651,6 +651,13 @@ body {
 }
 
 .region-row__sub {
+  /* The region's own name must win: a long centre like
+     "Сан-Фернандо-дель-Валье-де-Катамарка" used to squeeze it out entirely. */
+  flex: 0 1 auto;
+  min-inline-size: 0;
+  max-inline-size: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: var(--ink-soft);
   font-size: 0.8rem;
   white-space: nowrap;

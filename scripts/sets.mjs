@@ -90,6 +90,21 @@ export const SETS = [
     attribution: 'Natural Earth (public domain)',
   },
   {
+    id: 'argentina-provinces',
+    title: 'Провинции Аргентины',
+    group: 'Административные единицы',
+    country: 'Аргентина',
+    unit: ['единица', 'единицы', 'единиц'],
+    source: { kind: 'ne-admin1', adm0: 'ARG' },
+    // The country runs from 22°S to 55°S; Mercator would blow up Patagonia.
+    projection: 'conic',
+    rotate: [65, 0],
+    parallels: [-45, -25],
+    simplify: '12%',
+    modes: ['learn', 'locate'],
+    attribution: 'Natural Earth (public domain)',
+  },
+  {
     id: 'slovenia-regions',
     title: 'Регионы Словении',
     group: 'Административные единицы',

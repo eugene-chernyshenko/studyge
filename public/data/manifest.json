@@ -135,6 +135,39 @@
     "attribution": "Natural Earth (public domain)"
   },
   {
+    "id": "argentina-provinces",
+    "title": "Провинции Аргентины",
+    "group": "Административные единицы",
+    "country": "Аргентина",
+    "unit": [
+      "единица",
+      "единицы",
+      "единиц"
+    ],
+    "count": 24,
+    "modes": [
+      "learn",
+      "locate"
+    ],
+    "projection": "conic",
+    "rotate": [
+      65,
+      0
+    ],
+    "parallels": [
+      -45,
+      -25
+    ],
+    "bbox": [
+      -73.57,
+      -55.05,
+      -53.67,
+      -21.79
+    ],
+    "file": "data/argentina-provinces.json",
+    "attribution": "Natural Earth (public domain)"
+  },
+  {
     "id": "slovenia-regions",
     "title": "Регионы Словении",
     "group": "Административные единицы",
