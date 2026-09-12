@@ -20,7 +20,7 @@ const OVERRIDES = resolve(import.meta.dirname, 'ru-overrides.json')
 
 const readJson = async (p) => JSON.parse(await readFile(p, 'utf8'))
 
-const [admin1, admin0, places, nuts3, wikidata, areasRaw, seatsRaw, classNamesRaw, classSeatsRaw, nutsRuRaw, nutsSeatsRaw, overrides] =
+const [admin1, admin0, places, nuts3, wikidata, areasRaw, seatsRaw, classNamesRaw, classSeatsRaw, groupsRaw, nutsRuRaw, nutsSeatsRaw, overrides] =
   await Promise.all([
   readJson(resolve(CACHE, 'ne_10m_admin_1.geojson')),
   readJson(resolve(CACHE, 'ne_10m_admin_0.geojson')),
@@ -31,6 +31,7 @@ const [admin1, admin0, places, nuts3, wikidata, areasRaw, seatsRaw, classNamesRa
   readJson(resolve(CACHE, 'wikidata_seats.json')),
   readJson(resolve(CACHE, 'wikidata_class_names.json')),
   readJson(resolve(CACHE, 'wikidata_class_seats.json')),
+  readJson(resolve(CACHE, 'wikidata_groups.json')),
   readJson(resolve(CACHE, 'wikidata_nuts_ru.json')),
   readJson(resolve(CACHE, 'wikidata_nuts_seats.json')),
   existsSync(OVERRIDES) ? readJson(OVERRIDES) : {},
@@ -224,6 +225,45 @@ function fromNuts(country) {
     })
 }
 
+// Wikidata does not link Goiás to the Central-West region, so the mapping is
+// short by one state. Patched here rather than silently leaving a hole.
+const GROUP_OVERRIDES = { 'BR-GO': 'Q980175' }
+
+const groupsByMember = new Map()
+const groupLabels = new Map()
+for (const row of groupsRaw.results.bindings) {
+  const group = row.group.value.replace(/.*\//, '')
+  groupLabels.set(group, { ru: row.groupRu?.value ?? null, en: row.groupEn?.value ?? null })
+  groupsByMember.set(row.memberIso.value, group)
+}
+for (const [member, group] of Object.entries(GROUP_OVERRIDES)) groupsByMember.set(member, group)
+
+/** Units that exist only as groups of smaller ones — dissolved from admin-1. */
+function fromGroups(adm0) {
+  const isoOf = (p) => (p.iso_3166_2 && p.iso_3166_2 !== '-99' ? p.iso_3166_2 : null)
+  const members = admin1.features.filter((f) => f.properties.adm0_a3 === adm0)
+  const orphans = members.filter((f) => !groupsByMember.has(isoOf(f.properties)))
+  if (orphans.length) {
+    // Refusing to build beats shipping a map with a hole in it.
+    throw new Error(
+      `${adm0}: нет группы для ${orphans.map((f) => isoOf(f.properties) ?? f.properties.name).join(', ')}`,
+    )
+  }
+  return members.map((f) => {
+    const group = groupsByMember.get(isoOf(f.properties))
+    const label = groupLabels.get(group)
+    return {
+      type: 'Feature',
+      geometry: f.geometry,
+      properties: {
+        id: group,
+        name: overrides[group] || label?.ru || label?.en || group,
+        nameEn: label?.en ?? group,
+      },
+    }
+  })
+}
+
 function fromAdmin1(adm0, { include = [], exclude = [], excludeNames = [] } = {}) {
   const isoOf = (p) => (p.iso_3166_2 && p.iso_3166_2 !== '-99' ? p.iso_3166_2 : null)
   return admin1.features
@@ -412,13 +452,14 @@ for (const set of SETS) {
       ? fromAdmin0()
       : set.source.kind === 'ne-admin1'
         ? fromAdmin1(set.source.adm0, set.source)
+        : set.source.kind === 'grouped'
+        ? fromGroups(set.source.adm0)
         : set.source.kind === 'nuts'
-        ? fromNuts(set.source.country)
+          ? fromNuts(set.source.country)
         : await fromGeoBoundaries(set.source.file, set.source.isoPrefix)
 
   if (!features.length) throw new Error(`${set.id}: no features matched`)
   const withCentres = set.source.kind === 'ne-admin0' ? features : withSeats(features)
-  const seatCount = withCentres.filter((f) => f.properties.seat).length
 
   const input = JSON.stringify({ type: 'FeatureCollection', features: withCentres })
   const files = { 'in.json': input }
@@ -427,6 +468,7 @@ for (const set of SETS) {
     files['land.json'] = await readFile(resolve(CACHE, 'ne_10m_land.geojson'), 'utf8')
     cmd.push('-clip land.json')
   }
+  if (set.source.kind === 'grouped') cmd.push('-dissolve2 id copy-fields=name,nameEn')
   cmd.push(`-simplify ${set.simplify} keep-shapes weighted`, '-clean', '-o out.json format=topojson id-field=id')
   const result = await mapshaper.applyCommands(cmd.join(' '), files)
   const topo = JSON.parse(Buffer.from(result['out.json']).toString('utf8'))
@@ -471,10 +513,11 @@ for (const set of SETS) {
   })
 
   const kb = Math.round(JSON.stringify(topo).length / 1024)
-  const centres =
-    set.source.kind === 'ne-admin0'
-      ? collection.features.filter((f) => f.properties.capitalAt).length
-      : seatCount
+  // Counted on the built collection, not on the input: a grouped set dissolves
+  // 27 states into 5 regions and the input count reported "27/5".
+  const centres = collection.features.filter(
+    (f) => f.properties.capitalAt || f.properties.seat,
+  ).length
   console.log(
     `${set.id.padEnd(26)} ${String(collection.features.length).padStart(4)} регионов  ${String(kb).padStart(5)} KB` +
       `  центров ${String(centres).padStart(3)}/${collection.features.length}` +

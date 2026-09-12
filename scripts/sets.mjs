@@ -90,6 +90,22 @@ export const SETS = [
     attribution: 'Natural Earth (public domain)',
   },
   {
+    id: 'brazil-regions',
+    title: 'Регионы Бразилии',
+    group: 'Административные единицы',
+    country: 'Бразилия',
+    unit: ['регион', 'региона', 'регионов'],
+    // The five macro-regions have no geometry of their own in any open source;
+    // they are dissolved from the 27 states using Wikidata's membership data.
+    source: { kind: 'grouped', adm0: 'BRA' },
+    projection: 'conic',
+    rotate: [55, 0],
+    parallels: [-25, -5],
+    simplify: '12%',
+    modes: ['learn', 'locate'],
+    attribution: 'Natural Earth (public domain)',
+  },
+  {
     id: 'belgium-provinces',
     title: 'Провинции Бельгии и Брюссель',
     group: 'Административные единицы',
