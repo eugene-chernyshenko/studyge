@@ -45,11 +45,25 @@ const WIKIDATA_COUNTRIES = [
   'Q408', // Австралия
   'Q40', // Австрия
   'Q902', // Бангладеш
+  'Q31', // Бельгия
 ]
-const SPARQL = `SELECT ?c ?cEn ?item ?ru ?en ?native ?iso ?coord ?end WHERE {
-  VALUES ?c { ${WIKIDATA_COUNTRIES.map((q) => `wd:${q}`).join(' ')} }
-  ?c wdt:P150 ?item .
-  ?c rdfs:label ?cEn FILTER(lang(?cEn)="en")
+
+// Some units sit two levels below the country: Wikidata links Belgium to its
+// three regions, and the provinces only to those. Asking by class reaches them
+// without hard-coding the intermediate entities.
+const WIKIDATA_CLASSES = [
+  'Q83116', // province of Belgium
+]
+
+const COUNTRY_UNITS = `VALUES ?c { ${WIKIDATA_COUNTRIES.map((q) => `wd:${q}`).join(' ')} }
+  ?c wdt:P150 ?item .`
+
+// Asked separately rather than UNION-ed into the queries above: combined with
+// the area statements the endpoint timed out and answered with a stack trace.
+const CLASS_UNITS = `VALUES ?cls { ${WIKIDATA_CLASSES.map((q) => `wd:${q}`).join(' ')} }
+  ?item wdt:P31 ?cls .`
+const SPARQL = `SELECT ?item ?ru ?en ?native ?iso ?coord ?end WHERE {
+  ${COUNTRY_UNITS}
   OPTIONAL { ?item wdt:P300 ?iso }
   OPTIONAL { ?item wdt:P625 ?coord }
   OPTIONAL { ?item p:P31/pq:P582 ?end }
@@ -69,8 +83,7 @@ const COUNTRY_AREA_SPARQL = `SELECT ?item ?iso3 ?area ?unit ?rank WHERE {
 }`
 
 const SUBDIVISION_AREA_SPARQL = `SELECT ?item ?iso2 ?area ?unit ?rank WHERE {
-  VALUES ?c { ${WIKIDATA_COUNTRIES.map((q) => `wd:${q}`).join(' ')} }
-  ?c wdt:P150 ?item .
+  ${COUNTRY_UNITS}
   ?item wdt:P300 ?iso2 .
   ?item p:P2046 ?st .
   ?st psv:P2046 ?v ; wikibase:rank ?rank .
@@ -101,13 +114,37 @@ const NUTS_SEAT_SPARQL = `SELECT ?nuts ?seatRu ?seatEn ?coord WHERE {
 
 // Administrative seats: which town is the centre of each unit, and where it is.
 const SEAT_SPARQL = `SELECT ?item ?iso ?seatRu ?seatEn ?coord WHERE {
-  VALUES ?c { ${WIKIDATA_COUNTRIES.map((q) => `wd:${q}`).join(' ')} }
-  ?c wdt:P150 ?item .
+  ${COUNTRY_UNITS}
   ?item wdt:P300 ?iso .
   ?item wdt:P36 ?seat .
   ?seat wdt:P625 ?coord .
   OPTIONAL { ?seat rdfs:label ?seatRu FILTER(lang(?seatRu)="ru") }
   OPTIONAL { ?seat rdfs:label ?seatEn FILTER(lang(?seatEn)="en") }
+}`
+
+const CLASS_NAME_SPARQL = `SELECT ?item ?ru ?en ?iso ?coord ?end WHERE {
+  ${CLASS_UNITS}
+  ?item wdt:P300 ?iso .
+  OPTIONAL { ?item wdt:P625 ?coord }
+  OPTIONAL { ?item p:P31/pq:P582 ?end }
+  OPTIONAL { ?item rdfs:label ?ru FILTER(lang(?ru)="ru") }
+  OPTIONAL { ?item rdfs:label ?en FILTER(lang(?en)="en") }
+}`
+
+const CLASS_SEAT_SPARQL = `SELECT ?item ?iso ?seatRu ?seatEn ?coord WHERE {
+  ${CLASS_UNITS}
+  ?item wdt:P300 ?iso ; wdt:P36 ?seat .
+  ?seat wdt:P625 ?coord .
+  OPTIONAL { ?seat rdfs:label ?seatRu FILTER(lang(?seatRu)="ru") }
+  OPTIONAL { ?seat rdfs:label ?seatEn FILTER(lang(?seatEn)="en") }
+}`
+
+const CLASS_AREA_SPARQL = `SELECT ?item ?iso2 ?area ?unit ?rank WHERE {
+  ${CLASS_UNITS}
+  ?item wdt:P300 ?iso2 .
+  ?item p:P2046 ?st .
+  ?st psv:P2046 ?v ; wikibase:rank ?rank .
+  ?v wikibase:quantityAmount ?area ; wikibase:quantityUnit ?unit .
 }`
 
 async function exists(path) {
@@ -160,10 +197,20 @@ async function wikidata(file, query) {
       headers: { Accept: 'application/sparql-results+json', 'User-Agent': UA },
     })
     if (res.ok) {
-      await writeFile(path, await res.text())
-      return
+      const body = await res.text()
+      // A timed-out query comes back as HTTP 200 with a Java stack trace, which
+      // was being cached as if it were data and broke the build much later.
+      try {
+        const parsed = JSON.parse(body)
+        if (!Array.isArray(parsed?.results?.bindings)) throw new Error('no bindings')
+        await writeFile(path, body)
+        return
+      } catch {
+        console.log(`          ответ не похож на результат SPARQL, повтор`)
+      }
+    } else {
+      lastStatus = res.status
     }
-    lastStatus = res.status
     if (attempt < 4) {
       const wait = attempt * 15_000
       console.log(`          HTTP ${res.status}, повтор через ${wait / 1000} с`)
@@ -181,6 +228,9 @@ await wikidata('wikidata_admin_ru.json', SPARQL)
 await wikidata('wikidata_areas_countries.json', COUNTRY_AREA_SPARQL)
 await wikidata('wikidata_areas_subdivisions.json', SUBDIVISION_AREA_SPARQL)
 await wikidata('wikidata_seats.json', SEAT_SPARQL)
+await wikidata('wikidata_class_names.json', CLASS_NAME_SPARQL)
+await wikidata('wikidata_class_seats.json', CLASS_SEAT_SPARQL)
+await wikidata('wikidata_class_areas.json', CLASS_AREA_SPARQL)
 await wikidata('wikidata_nuts_ru.json', NUTS_NAME_SPARQL)
 await wikidata('wikidata_nuts_seats.json', NUTS_SEAT_SPARQL)
 await wikidata('wikidata_nuts_areas.json', NUTS_AREA_SPARQL)

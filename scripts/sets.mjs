@@ -90,6 +90,20 @@ export const SETS = [
     attribution: 'Natural Earth (public domain)',
   },
   {
+    id: 'belgium-provinces',
+    title: 'Провинции Бельгии и Брюссель',
+    group: 'Административные единицы',
+    country: 'Бельгия',
+    unit: ['единица', 'единицы', 'единиц'],
+    // Brussels is a region, not a province, but it is an enclave inside Flemish
+    // Brabant: leaving it out would punch a hole belonging to nothing.
+    source: { kind: 'ne-admin1', adm0: 'BEL' },
+    projection: 'mercator',
+    simplify: '30%',
+    modes: ['learn', 'locate'],
+    attribution: 'Natural Earth (public domain)',
+  },
+  {
     id: 'bangladesh-divisions',
     title: 'Области Бангладеш',
     group: 'Административные единицы',

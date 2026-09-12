@@ -135,6 +135,31 @@
     "attribution": "Natural Earth (public domain)"
   },
   {
+    "id": "belgium-provinces",
+    "title": "Провинции Бельгии и Брюссель",
+    "group": "Административные единицы",
+    "country": "Бельгия",
+    "unit": [
+      "единица",
+      "единицы",
+      "единиц"
+    ],
+    "count": 11,
+    "modes": [
+      "learn",
+      "locate"
+    ],
+    "projection": "mercator",
+    "bbox": [
+      2.52,
+      49.5,
+      6.37,
+      51.5
+    ],
+    "file": "data/belgium-provinces.json",
+    "attribution": "Natural Earth (public domain)"
+  },
+  {
     "id": "bangladesh-divisions",
     "title": "Области Бангладеш",
     "group": "Административные единицы",

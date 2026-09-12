@@ -20,7 +20,7 @@ const OVERRIDES = resolve(import.meta.dirname, 'ru-overrides.json')
 
 const readJson = async (p) => JSON.parse(await readFile(p, 'utf8'))
 
-const [admin1, admin0, places, nuts3, wikidata, areasRaw, seatsRaw, nutsRuRaw, nutsSeatsRaw, overrides] =
+const [admin1, admin0, places, nuts3, wikidata, areasRaw, seatsRaw, classNamesRaw, classSeatsRaw, nutsRuRaw, nutsSeatsRaw, overrides] =
   await Promise.all([
   readJson(resolve(CACHE, 'ne_10m_admin_1.geojson')),
   readJson(resolve(CACHE, 'ne_10m_admin_0.geojson')),
@@ -29,6 +29,8 @@ const [admin1, admin0, places, nuts3, wikidata, areasRaw, seatsRaw, nutsRuRaw, n
   readJson(resolve(CACHE, 'wikidata_admin_ru.json')),
   readJson(resolve(CACHE, 'wikidata_areas_subdivisions.json')),
   readJson(resolve(CACHE, 'wikidata_seats.json')),
+  readJson(resolve(CACHE, 'wikidata_class_names.json')),
+  readJson(resolve(CACHE, 'wikidata_class_seats.json')),
   readJson(resolve(CACHE, 'wikidata_nuts_ru.json')),
   readJson(resolve(CACHE, 'wikidata_nuts_seats.json')),
   existsSync(OVERRIDES) ? readJson(OVERRIDES) : {},
@@ -48,7 +50,9 @@ for (const f of admin1.features) remember(nameKey(f.properties.name), f.properti
 // the only reliable link there is "which polygon contains the town").
 const ruByIso = new Map()
 const ruPoints = []
-for (const row of wikidata.results.bindings) {
+// Country subdivisions plus units reached by class — Belgium's provinces sit two
+// levels down, so asking the country alone returned only its three regions.
+for (const row of [...wikidata.results.bindings, ...classNamesRaw.results.bindings]) {
   if (row.end) continue // skip abolished divisions
   // Keep entries with no Russian label: scripts/ru-overrides.json supplies those,
   // and dropping them here would leave their polygon unmatched entirely.
@@ -102,6 +106,7 @@ const POINT = /Point\(([-\d.]+) ([-\d.]+)\)/
 const seatByIso = new Map()
 for (const [rows, key] of [
   [seatsRaw.results.bindings, 'iso'],
+  [classSeatsRaw.results.bindings, 'iso'],
   [nutsSeatsRaw.results.bindings, 'nuts'],
 ]) {
   for (const row of rows) {
