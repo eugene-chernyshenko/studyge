@@ -80,14 +80,17 @@ const PROBES = {
     ['Денвер', -104.9903, 39.7392, 'Колорадо'],
     ['Сиэтл', -122.3321, 47.6062, 'Вашингтон'],
   ],
-  'brazil-regions': [
-    ['Манаус', -60.0217, -3.1019, 'Северный регион'],
-    ['Ресифи', -34.8811, -8.0539, 'Северо-восточный регион'],
-    ['Бразилиа', -47.8825, -15.7942, 'Центрально-западный регион'],
-    // Goiânia is in Goiás — the state Wikidata forgot to link to its region.
-    ['Гояния', -49.2648, -16.6869, 'Центрально-западный регион'],
-    ['Сан-Паулу', -46.6333, -23.5505, 'Юго-восточный регион'],
-    ['Порту-Алегри', -51.2177, -30.0346, 'Южный регион'],
+  'brazil-states': [
+    ['Сан-Паулу', -46.6333, -23.5505, 'Сан-Паулу'],
+    ['Рио-де-Жанейро', -43.1729, -22.9068, 'Рио-де-Жанейро'],
+    ['Бразилиа', -47.8825, -15.7942, 'Федеральный округ'],
+    ['Манаус', -60.0217, -3.1019, 'Амазонас'],
+    ['Ресифи', -34.8811, -8.0539, 'Пернамбуку'],
+    ['Порту-Алегри', -51.2177, -30.0346, 'Риу-Гранди-ду-Сул'],
+    ['Гояния', -49.2648, -16.6869, 'Гояс'],
+    ['Белен', -48.4902, -1.4558, 'Пара'],
+    ['Салвадор', -38.5014, -12.9777, 'Баия'],
+    ['Куяба', -56.0949, -15.6014, 'Мату-Гросу'],
   ],
   'belgium-provinces': [
     // Brussels is enclosed by Flemish Brabant, so it must be its own polygon.
@@ -255,7 +258,6 @@ const areaRows = (
       'wikidata_areas_subdivisions.json',
       'wikidata_nuts_areas.json',
       'wikidata_class_areas.json',
-      'wikidata_group_areas.json',
     ].map(async (file) =>
       JSON.parse(await readFile(resolve(CACHE, file), 'utf8')).results.bindings,
     ),
@@ -269,9 +271,7 @@ const publishedByIso = new Map()
 for (const row of areaRows) {
   if (row.unit.value !== SQUARE_KM) continue // a couple of entries are in m²
   const km2 = Number(row.area.value)
-  // Grouped units have no ISO code; they are keyed by their Wikidata id instead.
-  const group = row.group?.value?.replace(/.*\//, '')
-  for (const iso of [row.iso3?.value, row.iso2?.value, row.nuts?.value, group]) {
+  for (const iso of [row.iso3?.value, row.iso2?.value, row.nuts?.value]) {
     if (iso && !publishedByIso.has(iso)) publishedByIso.set(iso, km2)
   }
 }

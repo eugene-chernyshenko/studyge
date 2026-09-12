@@ -90,18 +90,19 @@ export const SETS = [
     attribution: 'Natural Earth (public domain)',
   },
   {
-    id: 'brazil-regions',
-    title: 'Регионы Бразилии',
+    id: 'brazil-states',
+    title: 'Штаты Бразилии и федеральный округ',
     group: 'Административные единицы',
     country: 'Бразилия',
-    unit: ['регион', 'региона', 'регионов'],
-    // The five macro-regions have no geometry of their own in any open source;
-    // they are dissolved from the 27 states using Wikidata's membership data.
-    source: { kind: 'grouped', adm0: 'BRA' },
+    unit: ['единица', 'единицы', 'единиц'],
+    source: { kind: 'ne-admin1', adm0: 'BRA' },
+    // Brazil spans 5°N to 34°S; a conic keeps the north and the south comparable.
     projection: 'conic',
     rotate: [55, 0],
     parallels: [-25, -5],
-    simplify: '12%',
+    // Belém sits in the Amazon delta and Salvador on a bay: at 10% both fell
+    // outside their own state, at 35% every probe lands inside.
+    simplify: '35%',
     modes: ['learn', 'locate'],
     attribution: 'Natural Earth (public domain)',
   },

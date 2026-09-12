@@ -135,16 +135,16 @@
     "attribution": "Natural Earth (public domain)"
   },
   {
-    "id": "brazil-regions",
-    "title": "Регионы Бразилии",
+    "id": "brazil-states",
+    "title": "Штаты Бразилии и федеральный округ",
     "group": "Административные единицы",
     "country": "Бразилия",
     "unit": [
-      "регион",
-      "региона",
-      "регионов"
+      "единица",
+      "единицы",
+      "единиц"
     ],
-    "count": 5,
+    "count": 27,
     "modes": [
       "learn",
       "locate"
@@ -159,12 +159,12 @@
       -5
     ],
     "bbox": [
-      -73.98,
+      -74.02,
       -33.74,
-      -34.8,
+      -29.35,
       5.27
     ],
-    "file": "data/brazil-regions.json",
+    "file": "data/brazil-states.json",
     "attribution": "Natural Earth (public domain)"
   },
   {

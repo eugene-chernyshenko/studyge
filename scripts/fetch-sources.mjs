@@ -46,6 +46,7 @@ const WIKIDATA_COUNTRIES = [
   'Q40', // Австрия
   'Q902', // Бангладеш
   'Q31', // Бельгия
+  'Q155', // Бразилия
 ]
 
 // Some units sit two levels below the country: Wikidata links Belgium to its
@@ -53,12 +54,6 @@ const WIKIDATA_COUNTRIES = [
 // without hard-coding the intermediate entities.
 const WIKIDATA_CLASSES = [
   'Q83116', // province of Belgium
-]
-
-// Units that exist only as groups of other units: Brazil's five macro-regions
-// have no geometry of their own anywhere, so they are dissolved from the states.
-const WIKIDATA_GROUP_CLASSES = [
-  'Q753113', // region of Brazil
 ]
 
 const COUNTRY_UNITS = `VALUES ?c { ${WIKIDATA_COUNTRIES.map((q) => `wd:${q}`).join(' ')} }
@@ -153,21 +148,6 @@ const CLASS_AREA_SPARQL = `SELECT ?item ?iso2 ?area ?unit ?rank WHERE {
   ?v wikibase:quantityAmount ?area ; wikibase:quantityUnit ?unit .
 }`
 
-const GROUP_SPARQL = `SELECT ?group ?groupRu ?groupEn ?memberIso WHERE {
-  VALUES ?cls { ${WIKIDATA_GROUP_CLASSES.map((q) => `wd:${q}`).join(' ')} }
-  ?group wdt:P31 ?cls .
-  ?member wdt:P361 ?group ; wdt:P300 ?memberIso .
-  OPTIONAL { ?group rdfs:label ?groupRu FILTER(lang(?groupRu)="ru") }
-  OPTIONAL { ?group rdfs:label ?groupEn FILTER(lang(?groupEn)="en") }
-}`
-
-const GROUP_AREA_SPARQL = `SELECT ?group ?area ?unit ?rank WHERE {
-  VALUES ?cls { ${WIKIDATA_GROUP_CLASSES.map((q) => `wd:${q}`).join(' ')} }
-  ?group wdt:P31 ?cls ; p:P2046 ?st .
-  ?st psv:P2046 ?v ; wikibase:rank ?rank .
-  ?v wikibase:quantityAmount ?area ; wikibase:quantityUnit ?unit .
-}`
-
 async function exists(path) {
   try {
     const s = await stat(path)
@@ -252,8 +232,6 @@ await wikidata('wikidata_seats.json', SEAT_SPARQL)
 await wikidata('wikidata_class_names.json', CLASS_NAME_SPARQL)
 await wikidata('wikidata_class_seats.json', CLASS_SEAT_SPARQL)
 await wikidata('wikidata_class_areas.json', CLASS_AREA_SPARQL)
-await wikidata('wikidata_groups.json', GROUP_SPARQL)
-await wikidata('wikidata_group_areas.json', GROUP_AREA_SPARQL)
 await wikidata('wikidata_nuts_ru.json', NUTS_NAME_SPARQL)
 await wikidata('wikidata_nuts_seats.json', NUTS_SEAT_SPARQL)
 await wikidata('wikidata_nuts_areas.json', NUTS_AREA_SPARQL)
