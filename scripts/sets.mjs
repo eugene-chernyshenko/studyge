@@ -90,6 +90,20 @@ export const SETS = [
     attribution: 'Natural Earth (public domain)',
   },
   {
+    id: 'bangladesh-divisions',
+    title: 'Области Бангладеш',
+    group: 'Административные единицы',
+    country: 'Бангладеш',
+    unit: ['область', 'области', 'областей'],
+    // Natural Earth still shows seven divisions: Mymensingh was split off from
+    // Dhaka in 2015 and only geoBoundaries has it.
+    source: { kind: 'geoboundaries', file: 'gb_BGD_ADM1.geojson', isoPrefix: 'BD-' },
+    projection: 'mercator',
+    simplify: '20%',
+    modes: ['learn', 'locate'],
+    attribution: 'geoBoundaries (CC BY 4.0)',
+  },
+  {
     id: 'austria-states',
     title: 'Земли Австрии',
     group: 'Административные единицы',

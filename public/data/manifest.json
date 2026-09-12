@@ -135,6 +135,31 @@
     "attribution": "Natural Earth (public domain)"
   },
   {
+    "id": "bangladesh-divisions",
+    "title": "Области Бангладеш",
+    "group": "Административные единицы",
+    "country": "Бангладеш",
+    "unit": [
+      "область",
+      "области",
+      "областей"
+    ],
+    "count": 8,
+    "modes": [
+      "learn",
+      "locate"
+    ],
+    "projection": "mercator",
+    "bbox": [
+      88.02,
+      20.78,
+      92.69,
+      26.58
+    ],
+    "file": "data/bangladesh-divisions.json",
+    "attribution": "geoBoundaries (CC BY 4.0)"
+  },
+  {
     "id": "austria-states",
     "title": "Земли Австрии",
     "group": "Административные единицы",

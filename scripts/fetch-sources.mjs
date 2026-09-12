@@ -23,6 +23,8 @@ const DOWNLOADS = [
 const GEOBOUNDARIES = [
   { file: 'gb_SVN_ADM2.geojson', iso: 'SVN', level: 'ADM2' }, // 213 občine vs NE's 193
   { file: 'gb_TCD_ADM1.geojson', iso: 'TCD', level: 'ADM1' }, // 23 provinces vs NE's 22
+  // Natural Earth predates Mymensingh, split off from Dhaka in 2015.
+  { file: 'gb_BGD_ADM1.geojson', iso: 'BGD', level: 'ADM1' },
 ]
 
 // Russian labels: P150 = "contains administrative territorial entity".
@@ -42,6 +44,7 @@ const WIKIDATA_COUNTRIES = [
   'Q414', // Аргентина
   'Q408', // Австралия
   'Q40', // Австрия
+  'Q902', // Бангладеш
 ]
 const SPARQL = `SELECT ?c ?cEn ?item ?ru ?en ?native ?iso ?coord ?end WHERE {
   VALUES ?c { ${WIKIDATA_COUNTRIES.map((q) => `wd:${q}`).join(' ')} }

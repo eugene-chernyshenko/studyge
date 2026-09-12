@@ -361,6 +361,11 @@ async function fromGeoBoundaries(file, isoPrefix) {
   const FAR = 0.5 // degrees
   for (const [i, c] of assigned) {
     if (!leftovers.includes(c)) continue
+    // Only worth reporting when the polygon has no code of its own: with a code
+    // from the source the point assignment is never consulted, and warning about
+    // it drowned the cases that actually need a look.
+    const own = features[i].properties.shapeISO
+    if (own && own !== 'None' && own !== '') continue
     if (dist2(centroids[i], c.at) > FAR ** 2) {
       console.log(`  ⚠ ${file}: ${c.iso} (${c.en ?? c.ru}) — сопоставление по близости, проверьте вручную`)
     }
